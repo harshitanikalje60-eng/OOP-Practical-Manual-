@@ -1,0 +1,42 @@
+#include <iostream>
+#include <exception>
+#include <string>
+using namespace std;
+ 
+class BankException : public exception {
+protected: string msg;
+public: BankException(string m) : msg(m) {}
+        const char* what() const noexcept override { return msg.c_str(); }
+};
+class InvalidAmount : public BankException {
+public: InvalidAmount(double a) : BankException("Invalid amount: " + to_string((int)a) + " (must be positive)") {}
+};
+class InsufficientFunds : public BankException {
+public: InsufficientFunds(double need, double have)
+        : BankException("Insufficient funds: requested " + to_string((int)need) + ", available " + to_string((int)have)) {}
+};
+ 
+class BankAccount {
+    double balance;
+public:
+    BankAccount(double b) : balance(b) {}
+    void withdraw(double amt) {
+        if (amt <= 0) throw InvalidAmount(amt);
+        if (amt > balance) throw InsufficientFunds(amt, balance);
+        balance -= amt;
+    }
+    double getBalance() const { return balance; }
+};
+ 
+int main() {
+    BankAccount acc(5000);
+    double tests[] = {2000, -500, 10000, 3000};
+    for (double amt : tests) {
+        cout << "Withdraw " << amt << ": ";
+        try { acc.withdraw(amt); cout << "Success. Balance = " << acc.getBalance() << "\n"; }
+        catch (const InvalidAmount& e)     { cout << "[InvalidAmount] " << e.what() << "\n"; }
+        catch (const InsufficientFunds& e) { cout << "[InsufficientFunds] " << e.what() << "\n"; }
+    }
+    cout << "Final balance = " << acc.getBalance() << "\n";
+    return 0;
+}
