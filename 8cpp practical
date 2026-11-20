@@ -1,0 +1,27 @@
+#include <iostream>
+#include <string>
+using namespace std;
+ 
+// Singleton: one shared application-settings object
+class Settings {
+    string theme; int fontSize;
+    Settings() : theme("Light"), fontSize(12) { cout << "Settings instance created\n"; }
+public:
+    Settings(const Settings&) = delete;
+    Settings& operator=(const Settings&) = delete;
+    static Settings& getInstance() { static Settings inst; return inst; }
+    void set(string t, int f) { theme = t; fontSize = f; }
+    void show() const { cout << "Theme: " << theme << ", Font size: " << fontSize << "\n"; }
+};
+ 
+int main() {
+    cout << "First call:\n";
+    Settings& s1 = Settings::getInstance();
+    s1.show();
+    s1.set("Dark", 16);
+    cout << "Second call (same object, change visible):\n";
+    Settings& s2 = Settings::getInstance();
+    s2.show();
+    cout << "Same instance? " << (&s1 == &s2 ? "Yes" : "No") << "\n";
+    return 0;
+}
