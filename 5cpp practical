@@ -1,0 +1,32 @@
+#include <iostream>
+#include <string>
+using namespace std;
+ 
+class Person {
+protected: string name; int age;
+public:
+    Person(string n, int a) : name(n), age(a) {}
+    void displayPerson() const { cout << "Name: " << name << ", Age: " << age << "\n"; }
+};
+class Student : public Person {
+protected: int id; string course;
+public:
+    Student(string n, int a, int i, string c) : Person(n, a), id(i), course(c) {}
+    void displayStudent() const { displayPerson(); cout << "Student ID: " << id << ", Course: " << course << "\n"; }
+};
+class GraduateStudent : public Student {
+    string topic;
+public:
+    GraduateStudent(string n, int a, int i, string c, string t) : Student(n, a, i, c), topic(t) {}
+    void displayGraduate() const { displayStudent(); cout << "Research Topic: " << topic << "\n"; }
+};
+ 
+int main() {
+    cout << "--- Single inheritance: Person -> Student ---\n";
+    Student s("Rahul Patil", 20, 1001, "B.Sc. Computer Science");
+    s.displayStudent();
+    cout << "\n--- Multilevel: Person -> Student -> GraduateStudent ---\n";
+    GraduateStudent g("Priya Joshi", 24, 2001, "M.Sc. Computer Science", "Machine Learning in Healthcare");
+    g.displayGraduate();
+    return 0;
+}
