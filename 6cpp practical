@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <iomanip>
+using namespace std;
+ 
+class Shape {
+public:
+    virtual double area() const = 0;        // pure virtual -> Shape is abstract
+    virtual string name() const = 0;
+    virtual ~Shape() {}
+};
+class Circle : public Shape {
+    double r;
+public:
+    Circle(double r) : r(r) {}
+    double area() const override { return 3.14159265 * r * r; }
+    string name() const override { return "Circle"; }
+};
+class Rectangle : public Shape {
+    double l, b;
+public:
+    Rectangle(double l, double b) : l(l), b(b) {}
+    double area() const override { return l * b; }
+    string name() const override { return "Rectangle"; }
+};
+class Triangle : public Shape {
+    double b, h;
+public:
+    Triangle(double b, double h) : b(b), h(h) {}
+    double area() const override { return 0.5 * b * h; }
+    string name() const override { return "Triangle"; }
+};
+ 
+int main() {
+    vector<unique_ptr<Shape>> shapes;
+    shapes.push_back(make_unique<Circle>(5));
+    shapes.push_back(make_unique<Rectangle>(4, 6));
+    shapes.push_back(make_unique<Triangle>(3, 8));
+    cout << fixed << setprecision(2);
+    for (auto& s : shapes)
+        cout << setw(10) << left << s->name() << " area = " << s->area() << "\n";   // correct area() chosen at runtime
+    // Shape s;  // ERROR: cannot instantiate abstract class
+    return 0;
+}
