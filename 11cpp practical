@@ -1,0 +1,50 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+ 
+struct Student { int id; string name; double marks; };
+ 
+int main() {
+    // CSV format: id,name,marks
+    vector<Student> list = {{1, "Amit", 85.5}, {2, "Sneha", 92}, {3, "Rahul", 78.25}};
+    ofstream out("students.csv");
+    if (!out) { cerr << "Cannot open file for writing\n"; return 1; }
+    out << "id,name,marks\n";
+    for (auto& s : list) out << s.id << "," << s.name << "," << s.marks << "\n";
+    out.close();
+    cout << "Written " << list.size() << " records to students.csv\n\n";
+ 
+    ifstream in("students.csv");
+    if (!in) { cerr << "Cannot open file for reading\n"; return 1; }
+    string line; getline(in, line);                       // skip header
+    cout << "ID  Name    Marks\n";
+    while (getline(in, line)) {
+        stringstream ss(line); string id, name, marks;
+        if (!getline(ss, id, ',') || !getline(ss, name, ',') || !getline(ss, marks)) { cout << "Malformed: " << line << "\n"; continue; }
+        cout << id << "   " << name << "   " << marks << "\n";
+    }
+    in.close();
+ 
+    cout << "\n--- Position functions ---\n";
+    fstream f("students.csv", ios::in | ios::out);
+    cout << "tellg at start        : " << f.tellg() << "\n";
+    getline(f, line);
+    cout << "tellg after 1st line  : " << f.tellg() << "\n";
+    f.seekg(0, ios::end);
+    cout << "tellg at end (size)   : " << f.tellg() << "\n";
+    f.seekg(0, ios::beg);
+    cout << "after seekg(0): tellg : " << f.tellg() << "\n";
+    f.seekp(0, ios::end);
+    cout << "tellp at end          : " << f.tellp() << "\n";
+    f << "4,Neha,88\n";
+    cout << "tellp after append    : " << f.tellp() << "\n";
+    f.seekp(0, ios::beg);
+    cout << "after seekp(0): tellp : " << f.tellp() << "\n";
+    f.close();
+    cout << "\nFinal file contents:\n";
+    ifstream r("students.csv"); while (getline(r, line)) cout << line << "\n";
+    return 0;
+}
