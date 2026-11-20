@@ -1,0 +1,53 @@
+#include <iostream>
+#include <utility>
+using namespace std;
+ 
+class IntArray {
+    int* data; int size;
+public:
+    IntArray() : data(nullptr), size(0) { cout << "Default constructor\n"; }
+    IntArray(int n, int v) : data(new int[n]), size(n) {
+        for (int i = 0; i < n; i++) data[i] = v;
+        cout << "Parameterized constructor (size " << n << ")\n";
+    }
+    IntArray(const IntArray& o) : data(new int[o.size]), size(o.size) {   // deep copy
+        for (int i = 0; i < size; i++) data[i] = o.data[i];
+        cout << "Copy constructor\n";
+    }
+    IntArray& operator=(const IntArray& o) {                              // deep copy assign
+        cout << "Copy assignment\n";
+        if (this != &o) {
+            delete[] data; size = o.size; data = new int[size];
+            for (int i = 0; i < size; i++) data[i] = o.data[i];
+        }
+        return *this;
+    }
+    IntArray(IntArray&& o) noexcept : data(o.data), size(o.size) {        // steal resource
+        o.data = nullptr; o.size = 0; cout << "Move constructor\n";
+    }
+    IntArray& operator=(IntArray&& o) noexcept {
+        cout << "Move assignment\n";
+        if (this != &o) { delete[] data; data = o.data; size = o.size; o.data = nullptr; o.size = 0; }
+        return *this;
+    }
+    ~IntArray() { delete[] data; cout << "Destructor (size " << size << ")\n"; }
+    void set(int i, int v) { data[i] = v; }
+    void show(const char* n) const {
+        cout << n << " [" << size << "]: ";
+        for (int i = 0; i < size; i++) cout << data[i] << " ";
+        cout << "\n";
+    }
+};
+ 
+int main() {
+    IntArray a;
+    IntArray b(3, 7);
+    IntArray c(b);               // copy ctor
+    c.set(0, 99);
+    a = b;                       // copy assignment
+    IntArray d(move(b));         // move ctor
+    IntArray e; e = move(c);     // move assignment
+    a.show("a"); b.show("b (moved-from)"); d.show("d"); e.show("e");
+    cout << "End of main\n";
+    return 0;
+}
