@@ -1,0 +1,77 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <map>
+#include <stdexcept>
+#include <string>
+using namespace std;
+ 
+class LibraryException : public runtime_error { public: using runtime_error::runtime_error; };
+ 
+class Book {
+    int id; string title, author; bool available;
+public:
+    Book(int i = 0, string t = "", string a = "", bool av = true) : id(i), title(t), author(a), available(av) {}
+    int getId() const { return id; }
+    bool isAvailable() const { return available; }
+    void setAvailable(bool v) { available = v; }
+    string toCSV() const { return to_string(id) + "," + title + "," + author + "," + (available ? "1" : "0"); }
+    void show() const { cout << "  " << id << " | " << title << " | " << author << " | " << (available ? "Available" : "Issued") << "\n"; }
+};
+ 
+class Library {
+    map<int, Book> books;
+public:
+    void add(const Book& b) {
+        if (books.count(b.getId())) throw LibraryException("Book ID already exists");
+        books[b.getId()] = b;
+    }
+    Book& find(int id) {
+        auto it = books.find(id);
+        if (it == books.end()) throw LibraryException("Book ID " + to_string(id) + " not found");
+        return it->second;
+    }
+    void issue(int id) {
+        Book& b = find(id);
+        if (!b.isAvailable()) throw LibraryException("Book " + to_string(id) + " is already issued");
+        b.setAvailable(false);
+    }
+    void giveBack(int id) { find(id).setAvailable(true); }
+    void list() const { for (auto& p : books) p.second.show(); }
+    void save(const string& f) const {
+        ofstream o(f); if (!o) throw LibraryException("Cannot write " + f);
+        for (auto& p : books) o << p.second.toCSV() << "\n";
+    }
+    void load(const string& f) {
+        ifstream in(f); if (!in) throw LibraryException("Cannot open " + f);
+        string line;
+        while (getline(in, line)) {
+            stringstream ss(line); string id, t, a, av;
+            getline(ss, id, ','); getline(ss, t, ','); getline(ss, a, ','); getline(ss, av);
+            books[stoi(id)] = Book(stoi(id), t, a, av == "1");
+        }
+    }
+};
+ 
+int main() {
+    Library lib;
+    lib.add(Book(1, "The C++ Programming Language", "Bjarne Stroustrup"));
+    lib.add(Book(2, "Effective Modern C++", "Scott Meyers"));
+    lib.add(Book(3, "Clean Code", "Robert Martin"));
+    cout << "== Books in library ==\n"; lib.list();
+ 
+    cout << "\n== Normal operations ==\n";
+    lib.issue(2); cout << "Issued book 2\n"; lib.list();
+    lib.giveBack(2); cout << "Returned book 2\n";
+    lib.issue(3);
+    lib.save("library.csv"); cout << "Saved to library.csv\n";
+ 
+    cout << "\n== Error cases ==\n";
+    try { lib.issue(3); }  catch (const LibraryException& e) { cout << "Error: " << e.what() << "\n"; }
+    try { lib.issue(99); } catch (const LibraryException& e) { cout << "Error: " << e.what() << "\n"; }
+    try { lib.add(Book(1, "Duplicate", "X")); } catch (const LibraryException& e) { cout << "Error: " << e.what() << "\n"; }
+ 
+    cout << "\n== Reload from file in a new Library ==\n";
+    Library lib2; lib2.load("library.csv"); lib2.list();
+    return 0;
+}
