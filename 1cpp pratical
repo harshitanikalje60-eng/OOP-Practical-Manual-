@@ -1,0 +1,27 @@
+#include <iostream>
+#include <string>
+using namespace std;
+ 
+int main() {
+    const double PASS_MARK = 40.0;      // constant value
+    string name;
+    int age;
+    double m1, m2, m3;
+ 
+    cout << "Enter name: ";           cin >> name;
+    cout << "Enter age: ";            cin >> age;
+    cout << "Enter marks in 3 subjects: ";
+    cin >> m1 >> m2 >> m3;
+ 
+    double total = m1 + m2 + m3;        // arithmetic
+    double avg = total / 3;
+    bool passed = (avg >= PASS_MARK) && (m1 >= 33 && m2 >= 33 && m3 >= 33); // relational + logical
+ 
+    cout << "\n--- Result ---\n";
+    cout << "Name    : " << name << "\n";
+    cout << "Age     : " << age << "\n";
+    cout << "Total   : " << total << "\n";
+    cout << "Average : " << avg << "\n";
+    cout << "Status  : " << (passed ? "PASS" : "FAIL") << "\n";
+    return 0;
+}
